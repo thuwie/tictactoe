@@ -6,6 +6,17 @@
 
 body {
     font: 13px Helvetica, Arial;
+    text-align:center;
+}
+
+.header {
+    margin: 25px 0;
+    font: 50px Helvetica, Arial;
+}
+
+.subheader {
+    margin: 10px 0;
+    font: 25px Helvetica, Arial;
 }
 
 #container {
@@ -83,4 +94,18 @@ body {
     margin: 0 5%;
     flex-grow: 1;
     align-self: end;
+}
+
+table .gameTable {
+    border-collapse: collapse;
+    width: 300px;
+    margin: 0 auto;
+}
+
+table .gameTable td {
+    height: 50px;
+    width: 50px;
+    border: 1px solid #555;
+    cursor: pointer;
+    text-align: center;
 }
