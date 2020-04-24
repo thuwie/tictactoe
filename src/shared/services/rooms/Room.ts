@@ -1,37 +1,34 @@
 import { RoomStatus } from '../../../common/roomStatus';
 import { AppGateway } from "../../../appGateway";
 import { Playfield } from "./Playfield";
-
-type Players
-{
-    first: string;
-    second: string;
-};
+import { Players } from "../../../types";
 
 export class Room {
     private readonly roomId: string;
     private roomStatus: RoomStatus;
     private turnsCount: number;
-    private players: object;
+    private players: Players;
     private playfield: Playfield;
 
     constructor(id: string) {
         this.roomId = id;
         this.roomStatus = RoomStatus.CREATED;
         this.turnsCount = 0;
-        this.players = { first: null, second: null };
+        this.players = { first: null, second: null, spectators: [] };
         this.playfield = new Playfield();
     }
 
-    public registerPlayer(playerId: string): object {
+    public registerPlayer(playerId: string): String {
         if (!this.players.first) {
             this.players.first = playerId;
+        } else {
+            if (!this.players.second) {
+                this.players.second = playerId;
+            } else {
+                this.players.spectators.push(playerId);
+            }
         }
-        if (!this.players.second) {
-            this.players.second = playerId;
-        }
-
-        return this.players;
+        return this.getReadablePlayers();
     }
 
     public start(): void {
@@ -58,6 +55,11 @@ export class Room {
             case 3:
                 return 'Finished';
         }
+    }
+
+    private getReadablePlayers(): string {
+        const {first,second,spectators}=this.players;
+        return `${first} vs. ${second}. ${spectators.length} watching: ${spectators.toString()}`;
     }
 
     get id(): string {

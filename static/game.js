@@ -7,6 +7,7 @@ $(function () {
 
   $('#title').text(`Game ${roomId}`);
   socketSendJoinMessage(socket, roomId);
+  onSocketUpdate(socket);
 });
 
 function socketSendJoinMessage(socket, roomId) {
@@ -20,7 +21,7 @@ function toSocketUpdate() {
 }
 function onSocketUpdate(socket) {
   socket.on('playerJoined', (message) => {
+    console.log(message);
     $('#players').text(message);
   });
-
 }

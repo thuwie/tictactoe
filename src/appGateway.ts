@@ -10,6 +10,7 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { RoomsService, SocketService } from './shared/services';
+import { Players } from "./types";
 
 @WebSocketGateway()
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -23,6 +24,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
 
     afterInit(server: Server) {
+        this.socketService.socket = server;
         this.socket = server;
     }
 
@@ -36,11 +38,11 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
 
     @SubscribeMessage('joinRoom')
-    handleJoin(@MessageBody() data: object): void {
+    handleJoin(@MessageBody() data: Players): void {
         const { playerId, roomId } = data as any;
         const room = this.roomsSerivce.getRoomById(roomId);
         const players = room.registerPlayer(playerId);
-        this.socket.emit('playerJoined', `${players.first} vs. ${players.second}`);
+        this.socket.emit('playerJoined', players);
     }
 
 }
