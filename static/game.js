@@ -7,7 +7,7 @@ $(function () {
 
     $('#title').text(`Game ${roomId}`);
     socketSendJoinMessage(socket, roomId);
-    onSocketUpdate(socket);
+    setSocketListeners(socket);
     drawTable();
 });
 
@@ -17,20 +17,22 @@ function socketSendJoinMessage(socket, roomId) {
     });
 }
 
-function toSocketUpdate() {
-
-}
-
-function onSocketUpdate(socket) {
-    socket.on('playerJoined', (message) => {
+function setSocketListeners(socket) {
+    socket.on('playersChanged', (message) => {
         console.log(message);
         $('#players').text(message);
     });
+    socket.on('turn', (message) => {
+
+    });
+}
+
+function activeClick(element) {
+    console.log(element.id);
 }
 
 function drawTable() {
     $('#playfield').text('');
-
     $('#playfield').append(drawField(3));
 }
 
@@ -41,7 +43,7 @@ function drawField(n, big, nested) {
         for (let j = 0; j < n; j++) {
             if (nested) {
                 const id = big + '.' + (n * (i-1) + j + 1);
-                table += `<td class="activeZone" id="${id}">${id}</td>`
+                table += `<td class="activeZone" onClick='activeClick(this)' id="${id}"></td>`
             } else {
                 table += `<td>${drawField(3, (n * (i-1) + j + 1), true)}</td>`;
             }

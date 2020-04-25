@@ -34,19 +34,32 @@ export class RoomsService {
   }
 
   cleanUp(id?: string): number {
+    let cleanedUp: number = 0;
     if (id) {
       const room = this.getRoomById(id);
       room.kill();
-      return 1;
+      cleanedUp = 1;
     } else {
       const rooms = this.getRooms(RoomStatus.ABANDONED);
       rooms.forEach((room: Room) => {
         room.kill();
         this.rooms.delete(room.id);
       });
-      return rooms.length;
+      cleanedUp = rooms.length;
     }
-    // TODO socket send update
+    this.socketService.cleanUp(this.getRooms());
+    return cleanedUp;
+  }
+
+  regPlayer(playerId, roomId): string {
+    const room = this.getRoomById(roomId);
+    const players = room.registerPlayer(playerId);
+    return players;
+  }
+
+  unregPlayer(playerId, roomId): string {
+    const room = this.getRoomById(roomId);
+    if (room) return room.unregisterPlayer(playerId);
   }
 
   @Cron('1 */1 * * * *')

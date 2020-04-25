@@ -14,7 +14,7 @@ function getStatus(status) {
 async function createRoom() {
     try {
         const result = await axios.get(`${url}/createRoom`);
-        window.location.replace(window.location.href + result.data);
+        window.location.href = `${window.location.href}${result.data}`;
     } catch (err) {
         console.log(err);
     }
@@ -22,7 +22,7 @@ async function createRoom() {
 async function joinGame(element) {
     const { id } = element;
     console.log(id);
-    window.location.replace(window.location.href + `game.html?id=${id}`);
+    window.location.href = `${window.location.href}game.html?id=${id}`;
 }
 
 $(function () {

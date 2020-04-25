@@ -1,5 +1,4 @@
 import { RoomStatus } from '../../../common/roomStatus';
-import { AppGateway } from "../../../appGateway";
 import { Playfield } from "./Playfield";
 import { Players } from "../../../types";
 
@@ -18,16 +17,34 @@ export class Room {
         this.playfield = new Playfield();
     }
 
-    public registerPlayer(playerId: string): String {
+    public registerPlayer(playerId: string): string {
+        if (this.roomStatus === RoomStatus.FINISHED || this.roomStatus === RoomStatus.ABANDONED) return '';
+
         if (!this.players.first) {
             this.players.first = playerId;
         } else {
             if (!this.players.second) {
                 this.players.second = playerId;
+                this.roomStatus = RoomStatus.STARTED;
             } else {
                 this.players.spectators.push(playerId);
             }
         }
+        return this.getReadablePlayers();
+    }
+
+    public unregisterPlayer(playerId: string): string {
+        if (this.players.first === playerId) {
+            this.players.first = null;
+            this.roomStatus = RoomStatus.ABANDONED;
+            return this.getReadablePlayers();
+        }
+        if (this.players.second === playerId) {
+            this.players.second = null;
+            this.roomStatus = RoomStatus.ABANDONED;
+            return this.getReadablePlayers();
+        }
+        this.players.spectators = this.players.spectators.filter((player) => player !== playerId);
         return this.getReadablePlayers();
     }
 
@@ -49,16 +66,16 @@ export class Room {
             case 0:
                 return 'Waiting for the opponent';
             case 1:
-                return 'Preparing';
-            case 2:
                 return 'In game';
-            case 3:
+            case 2:
                 return 'Finished';
+            case 3:
+                return 'Abandoned';
         }
     }
 
     private getReadablePlayers(): string {
-        const {first,second,spectators}=this.players;
+        const { first, second, spectators } = this.players;
         return `${first} vs. ${second}. ${spectators.length} watching: ${spectators.toString()}`;
     }
 

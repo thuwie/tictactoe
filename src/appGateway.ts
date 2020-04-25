@@ -10,16 +10,18 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { RoomsService, SocketService } from './shared/services';
-import { Players } from "./types";
+import { JoinRoomPayload, Players } from "./types";
 
 @WebSocketGateway()
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() public server: Server;
     private socket: Server = null;
     private logger: Logger = new Logger('AppGateway');
+    private playerMap: Map<string, string>;
 
     constructor(private socketService: SocketService,
                 private roomsSerivce: RoomsService) {
+        this.playerMap = new Map();
     }
 
 
@@ -29,7 +31,17 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
 
     handleDisconnect(client: Socket) {
-        this.logger.log(`Client disconnected: ${client.id}`);
+        const {id} = client;
+        this.logger.log(`Client disconnected: ${id}`);
+        const roomId = this.playerMap.get(id);
+
+        if (!roomId) return;
+
+        const players = this.roomsSerivce.unregPlayer(id, roomId);
+        this.playerMap.delete(id);
+        console.log(this.playerMap);
+        this.socket.emit('playersChanged', players);
+        this.socket.emit('roomsList', { rooms: this.roomsSerivce.getRooms() });
     }
 
     handleConnection(client: Socket, ...args: any[]) {
@@ -38,11 +50,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
 
     @SubscribeMessage('joinRoom')
-    handleJoin(@MessageBody() data: Players): void {
-        const { playerId, roomId } = data as any;
-        const room = this.roomsSerivce.getRoomById(roomId);
-        const players = room.registerPlayer(playerId);
-        this.socket.emit('playerJoined', players);
+    handleJoin(@MessageBody() data: JoinRoomPayload): void {
+        const { playerId, roomId } = data;
+        const players = this.roomsSerivce.regPlayer(playerId, roomId);
+        this.playerMap.set(playerId, roomId);
+        console.log(this.playerMap);
+        this.socket.emit('playersChanged', players);
     }
 
 }

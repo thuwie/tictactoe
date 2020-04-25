@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
+import { Room } from '../rooms/Room';
 
 @Injectable()
 export class SocketService {
@@ -7,8 +8,8 @@ export class SocketService {
   }
   public socket: Server = null;
 
-  public joinPlayer(playerId: string, roomId: string) {
-
+  public cleanUp(rooms: Room[]) {
+    this.socket.emit('roomsList', { rooms });
   }
 
 }
