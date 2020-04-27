@@ -11,6 +11,7 @@ import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { RoomsService, SocketService } from './shared/services';
 import { JoinRoomPayload, Players } from "./types";
+import { SendTurnPayload } from "./types/payloads/SendTurnPayload";
 
 @WebSocketGateway()
 export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -31,7 +32,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
 
     handleDisconnect(client: Socket) {
-        const {id} = client;
+        const { id } = client;
         this.logger.log(`Client disconnected: ${id}`);
         const roomId = this.playerMap.get(id);
 
@@ -56,6 +57,12 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         this.playerMap.set(playerId, roomId);
         console.log(this.playerMap);
         this.socket.emit('playersChanged', players);
+    }
+
+    @SubscribeMessage('sendTurn')
+    handleTurn(@MessageBody() data: SendTurnPayload): void {
+        const { playerId, roomId, turn } = data;
+        const room = this.roomsSerivce.makeTurn(playerId, roomId, turn);
     }
 
 }

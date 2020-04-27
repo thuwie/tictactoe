@@ -1,12 +1,16 @@
 import { RoomStatus } from '../../../common/roomStatus';
 import { Playfield } from "./Playfield";
 import { Players } from "../../../types";
+import { Turn } from "../../../types/Turn";
+import { OnTurnUpdate } from "../../../types/OnTurnUpdate";
+import { Player } from "../../../common/player";
 
 export class Room {
     private readonly roomId: string;
     private roomStatus: RoomStatus;
     private turnsCount: number;
     private players: Players;
+    private activePlayer: string;
     private playfield: Playfield;
 
     constructor(id: string) {
@@ -15,6 +19,7 @@ export class Room {
         this.turnsCount = 0;
         this.players = { first: null, second: null, spectators: [] };
         this.playfield = new Playfield();
+        this.activePlayer = null;
     }
 
     public registerPlayer(playerId: string): string {
@@ -22,6 +27,7 @@ export class Room {
 
         if (!this.players.first) {
             this.players.first = playerId;
+            this.activePlayer = playerId;
         } else {
             if (!this.players.second) {
                 this.players.second = playerId;
@@ -46,6 +52,21 @@ export class Room {
         }
         this.players.spectators = this.players.spectators.filter((player) => player !== playerId);
         return this.getReadablePlayers();
+    }
+
+    public makeTurn(playerId: string, turn: Turn): OnTurnUpdate | null {
+        const player = this.authorizePlayer(playerId);
+        if (!player) return null;
+
+        const win = this.playfield.updateField(player, turn);
+
+        if (!win) this.changeTurn(playerId);
+        return {
+            win,
+            activePlayer: this.activePlayer,
+            playfield: this.playfield.field as any,
+            turnsCount: this.turnsCount
+        };
     }
 
     public start(): void {
@@ -77,6 +98,21 @@ export class Room {
     private getReadablePlayers(): string {
         const { first, second, spectators } = this.players;
         return `${first} vs. ${second}. ${spectators.length} watching: ${spectators.toString()}`;
+    }
+
+    private authorizePlayer(playerId: string): Player | null {
+        if (playerId === this.players.first) return Player.first;
+        if (playerId === this.players.second) return Player.second;
+        return null;
+    }
+
+    private changeTurn(playerId: string): void {
+        this.turnsCount++;
+        if (playerId === this.players.first) {
+            this.activePlayer = this.players.second;
+        } else {
+            this.activePlayer = this.players.first;
+        }
     }
 
     get id(): string {
