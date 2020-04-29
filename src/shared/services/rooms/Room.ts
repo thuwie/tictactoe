@@ -12,6 +12,7 @@ export class Room {
     private players: Players;
     private activePlayer: string;
     private playfield: Playfield;
+    private activeBig: number;
 
     constructor(id: string) {
         this.roomId = id;
@@ -20,6 +21,7 @@ export class Room {
         this.players = { first: null, second: null, spectators: [] };
         this.playfield = new Playfield();
         this.activePlayer = null;
+        this.activeBig = 5;
     }
 
     public registerPlayer(playerId: string): string {
@@ -61,11 +63,13 @@ export class Room {
         const win = this.playfield.updateField(player, turn);
 
         if (!win) this.changeTurn(playerId);
+        this.activeBig = turn.short;
         return {
             win,
             activePlayer: this.activePlayer,
             playfield: this.playfield.field as any,
-            turnsCount: this.turnsCount
+            turnsCount: this.turnsCount,
+            big: this.activeBig,
         };
     }
 

@@ -13,11 +13,11 @@ export class SocketService {
         this.socket.emit('roomsList', { rooms });
     }
 
-    public updateField(playfield, activePlayer, turn) {
-        this.socket.emit('getTurn', { playfield, activePlayer, turn });
+    public updateField(playfield, activePlayer, turnsCount, big) {
+        this.socket.emit('getTurn', { playfield, activePlayer, turnsCount, big });
     }
 
-    public endGame(playfield, activePlayer, turn) {
-        this.socket.emit('endgame', { playfield, activePlayer, turn });
+    public endGame(playfield, activePlayer, turnsCount) {
+        this.socket.emit('endgame', { playfield, activePlayer, turnsCount });
     }
 }

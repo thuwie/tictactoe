@@ -21,36 +21,33 @@ function socketSendJoinMessage(socket, roomId) {
 
 function setSocketListeners(socket) {
     socket.on('playersChanged', (message) => {
-        console.log(message);
         $('#players').text(message);
     });
     socket.on('getTurn', (message) => {
-        console.log(message);
-        const {win, activePlayer, playfield, turnsCount} = message;
+        const {win, activePlayer, playfield, big, turnsCount} = message;
 
+        $('#turns').text(`${activePlayer}'s turn. Turn #${turnsCount}`);
         if (activePlayer !== socket.id) {
             changeActiveBig(-1);
-            $('#turns').text(`${activePlayer}'s turn. Turn #${turnsCount}`);
         } else {
             // TODO change big value send from the backend
-            changeActiveBig(5);
-            updateField(playfield);
+            changeActiveBig(Number.parseInt(big));
         }
-
+        updateField(playfield);
     });
     socket.on('endgame', (message) => {
         const {win, activePlayer, playfield, turnsCount} = message;
 
         $('#turns').text(`${activePlayer} wins at the turn ${turnsCount}! Congratulations!`);
+        updateField(playfield);
+        changeActiveBig(-1);
     })
 }
 
 function activeClick(element) {
     if (($(element).hasClass('unselectable'))) return;
 
-    console.log(element.id);
-    $(element).text('X');
-    console.log($(element).text());
+    $(element).text('•');
     disactivateElement(element);
     const [big, short] = element.id.split('_');
     socket.emit('sendTurn', {playerId: socket.id, roomId, turn: {big, short}});
@@ -84,7 +81,6 @@ function drawField(n, big, nested) {
 
 function activateBig(big) {
     for (let i = 1; i < 10; i++) {
-        console.log(`${big}${i}`);
         $(`#${big}_${i}`).removeClass('unselectable');
         $(`#${big}_${i}`).addClass('selectable');
     }
@@ -116,10 +112,8 @@ function updateField(playfield) {
     Object.entries(playfield).forEach(([bigIndex, big]) => {
         Object.entries(big).forEach(([shortIndex, shortPlayer]) => {
             let symbol = '';
-            console.log(shortPlayer);
             if (shortPlayer === 1) symbol = 'X';
             if (shortPlayer === 2) symbol = 'O';
-            console.log(bigIndex, shortIndex);
             $(`#${bigIndex}_${shortIndex}`).text(symbol);
         })
     })

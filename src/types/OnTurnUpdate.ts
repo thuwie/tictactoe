@@ -8,4 +8,6 @@ export type OnTurnUpdate = {
     playfield: Playfield;
 
     turnsCount: number;
+
+    big: number;
 };

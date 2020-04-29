@@ -65,10 +65,10 @@ export class RoomsService {
 
     makeTurn(playerId: string, roomId: string, turn: Turn): any {
         const room = this.getRoomById(roomId);
-        const { win, playfield, activePlayer, turnsCount } = room.makeTurn(playerId, turn);
+        const { win, playfield, activePlayer, turnsCount, big } = room.makeTurn(playerId, turn);
 
         if (!win) {
-            this.socketService.updateField(playfield, activePlayer, turnsCount);
+            this.socketService.updateField(playfield, activePlayer, turnsCount, big);
         } else {
             this.socketService.endGame(playfield, activePlayer, turnsCount);
         }
