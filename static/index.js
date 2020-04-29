@@ -1,4 +1,4 @@
-const url = 'http://localhost:3000/api';
+const url = 'http://quizzup.ru/api';
 function getStatus(status) {
     switch (status) {
         case 0:

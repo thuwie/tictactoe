@@ -1,4 +1,4 @@
-const url = 'http://localhost:3000/api';
+const url = 'http://quizzup.ru/api';
 let socket;
 let roomId;
 $(function () {
